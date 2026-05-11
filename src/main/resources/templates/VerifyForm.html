@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Verify Certificate | CertChain</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #f1f5f9; font-family: 'Segoe UI', system-ui, sans-serif; }
+
+    .sidebar {
+      position: fixed; left: 0; top: 0; bottom: 0; width: 250px;
+      background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
+      padding: 0; z-index: 100; overflow-y: auto;
+    }
+    .sidebar-brand { padding: 24px 20px 20px; border-bottom: 1px solid rgba(255,255,255,0.06); }
+    .sidebar-brand h3 { color: #fff; font-size: 20px; font-weight: 700; letter-spacing: -0.5px; margin: 0; }
+    .sidebar-brand small { color: #94a3b8; font-size: 12px; }
+    .sidebar-nav { padding: 12px 0; }
+    .sidebar-nav a { display: flex; align-items: center; gap: 12px; padding: 11px 20px; color: #cbd5e1; text-decoration: none; font-size: 14px; font-weight: 500; transition: all 0.2s; border-left: 3px solid transparent; }
+    .sidebar-nav a:hover, .sidebar-nav a.active { background: rgba(255,255,255,0.06); color: #fff; border-left-color: #4f46e5; }
+    .sidebar-nav a i { font-size: 18px; width: 22px; text-align: center; }
+    .sidebar-nav .section-label { padding: 16px 20px 6px; font-size: 11px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 1px; }
+
+    .main-content { margin-left: 250px; min-height: 100vh; }
+    .topbar { background: #fff; padding: 16px 32px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; z-index: 99; }
+    .topbar h4 { font-size: 18px; font-weight: 600; color: #0f172a; margin: 0; }
+
+    .user-badge { display: flex; align-items: center; gap: 10px; background: #f1f5f9; padding: 6px 14px 6px 10px; border-radius: 20px; font-size: 13px; color: #334155; }
+    .user-badge .avatar { width: 30px; height: 30px; border-radius: 50%; background: linear-gradient(135deg, #4f46e5, #7c3aed); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; }
+
+    .content { padding: 28px 32px; }
+
+    .verify-card { background: #fff; border-radius: 14px; border: 1px solid #e2e8f0; overflow: hidden; max-width: 700px; }
+    .verify-card .card-head { padding: 20px 28px; border-bottom: 1px solid #e2e8f0; background: #f8fafc; }
+    .verify-card .card-head h5 { font-size: 16px; font-weight: 600; color: #0f172a; margin: 0; }
+    .verify-card .card-head p { font-size: 13px; color: #64748b; margin: 4px 0 0; }
+
+    .card-body { padding: 32px 28px; }
+
+    .upload-zone { border: 2px dashed #cbd5e1; border-radius: 12px; padding: 36px 20px; cursor: pointer; transition: all 0.2s; background: #f8fafc; text-align: center; }
+    .upload-zone:hover { border-color: #4f46e5; background: #eef2ff; }
+    .upload-zone i { font-size: 36px; color: #94a3b8; }
+    .upload-zone p { margin: 8px 0 0; color: #64748b; font-size: 14px; }
+    .upload-zone small { color: #94a3b8; font-size: 12px; }
+
+    .divider { display: flex; align-items: center; gap: 12px; margin: 20px 0; color: #94a3b8; font-size: 12px; }
+    .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: #e2e8f0; }
+
+    .btn-verify { height: 44px; background: linear-gradient(135deg, #4f46e5, #7c3aed); color: #fff; border: none; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; padding: 0 28px; transition: all 0.25s; }
+    .btn-verify:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(79,70,229,0.35); }
+
+    .result-card { border-radius: 12px; padding: 24px; margin-top: 24px; }
+    .result-valid { background: #f0fdf4; border: 1px solid #bbf7d0; }
+    .result-invalid { background: #fef2f2; border: 1px solid #fecaca; }
+
+    .hash-text { font-family: 'SF Mono', 'Cascadia Code', monospace; font-size: 11px; word-break: break-all; color: #475569; }
+
+    .error-msg { background: #fef2f2; border: 1px solid #fecaca; border-radius: 10px; padding: 12px 16px; color: #dc2626; font-size: 13px; margin-top: 16px; }
+
+    @media (max-width: 768px) {
+      .sidebar { width: 60px; }
+      .sidebar-brand h3, .sidebar-brand small, .sidebar-nav a span, .sidebar-nav .section-label { display: none; }
+      .sidebar-nav a { justify-content: center; padding: 14px; border-left: none; }
+      .main-content { margin-left: 60px; }
+      .content { padding: 20px 16px; }
+      .topbar { padding: 12px 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="sidebar">
+  <div class="sidebar-brand">
+    <h3>CertChain</h3>
+    <small>HR Portal</small>
+  </div>
+  <div class="sidebar-nav">
+    <div class="section-label">Main</div>
+    <a href="/hrHome"><i class="bi bi-grid-1x2-fill"></i><span>Dashboard</span></a>
+    <div class="section-label">Verification</div>
+    <a href="/verify" class="active"><i class="bi bi-shield-check"></i><span>Verify Certificate</span></a>
+    <div class="section-label">Blockchain</div>
+    <a href="/block/explorer"><i class="bi bi-link-45deg"></i><span>Blockchain Explorer</span></a>
+    <div class="section-label">Account</div>
+    <a href="/logout"><i class="bi bi-box-arrow-left"></i><span>Logout</span></a>
+  </div>
+</div>
+
+<div class="main-content">
+  <div class="topbar">
+    <h4>Verify Certificate</h4>
+    <div class="user-badge">
+      <div class="avatar">H</div>
+      <span>HR</span>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <div class="verify-card">
+      <div class="card-head">
+        <h5><i class="bi bi-shield-check me-2"></i>Certificate Verification</h5>
+        <p>Upload the certificate file or enter the hash to verify authenticity on the blockchain</p>
+      </div>
+
+      <div class="card-body">
+
+        <form action="/verify" method="POST" enctype="multipart/form-data">
+          <div class="upload-zone" onclick="document.getElementById('fileInput').click()">
+            <i class="bi bi-cloud-arrow-up"></i>
+            <p><strong>Click to upload</strong> or drag and drop file</p>
+            <small>Upload certificate file (PDF, PNG, TXT)</small>
+            <input type="file" name="file" id="fileInput" class="d-none">
+          </div>
+
+          <div class="divider">OR</div>
+
+          <div class="d-flex gap-2">
+            <input type="text" name="hash" class="form-control" placeholder="Paste the certificate hash here..." style="height:44px;border-radius:10px;">
+            <button type="submit" class="btn-verify"><i class="bi bi-shield-check me-1"></i>Verify</button>
+          </div>
+        </form>
+
+        <div th:if="${error}" class="error-msg" th:text="${error}">Error</div>
+
+        <div th:if="${result}" class="result-card" th:classappend="${result.valid} ? 'result-valid' : 'result-invalid'">
+          <div class="d-flex align-items-start gap-3">
+            <div style="font-size:32px;">
+              <i th:if="${result.valid}" class="bi bi-check-circle-fill" style="color:#15803d;"></i>
+              <i th:unless="${result.valid}" class="bi bi-x-circle-fill" style="color:#dc2626;"></i>
+            </div>
+            <div style="flex:1;">
+              <h5 style="font-weight:700;margin-bottom:6px;" th:text="${result.message}">Result</h5>
+
+              <div th:if="${result.valid}" style="font-size:14px;color:#334155;line-height:1.8;">
+                <div class="row">
+                  <div class="col-4 text-muted">Student</div>
+                  <div class="col-8" th:text="${result.studentName}">John Doe</div>
+                </div>
+                <div class="row">
+                  <div class="col-4 text-muted">Course</div>
+                  <div class="col-8" th:text="${result.courseName}">Course</div>
+                </div>
+                <div class="row">
+                  <div class="col-4 text-muted">Issuer</div>
+                  <div class="col-8" th:text="${result.issuer}">Issuer</div>
+                </div>
+                <div class="row">
+                  <div class="col-4 text-muted">Issue Date</div>
+                  <div class="col-8" th:text="${result.issueDate}">Date</div>
+                </div>
+                <div class="row">
+                  <div class="col-4 text-muted">Blockchain Hash</div>
+                  <div class="col-8"><span class="hash-text" th:text="${result.certificateHash}">hash</span></div>
+                </div>
+              </div>
+
+              <div th:if="${!result.valid}" style="font-size:14px;color:#dc2626;margin-top:4px;">
+                <span th:if="${result.reason}" th:text="${result.reason}">Reason</span>
+                <span th:unless="${result.reason}">The certificate could not be verified. It may be tampered or not registered on the blockchain.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>

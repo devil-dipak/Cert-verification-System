@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard | CertChain</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #f1f5f9; font-family: 'Segoe UI', system-ui, sans-serif; }
+
+    .sidebar {
+      position: fixed; left: 0; top: 0; bottom: 0; width: 250px;
+      background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
+      padding: 0; z-index: 100; overflow-y: auto;
+    }
+
+    .sidebar-brand {
+      padding: 24px 20px 20px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .sidebar-brand h3 {
+      color: #fff; font-size: 20px; font-weight: 700;
+      letter-spacing: -0.5px; margin: 0;
+    }
+
+    .sidebar-brand small { color: #94a3b8; font-size: 12px; }
+
+    .sidebar-nav { padding: 12px 0; }
+
+    .sidebar-nav a {
+      display: flex; align-items: center; gap: 12px;
+      padding: 11px 20px; color: #cbd5e1; text-decoration: none;
+      font-size: 14px; font-weight: 500;
+      transition: all 0.2s; border-left: 3px solid transparent;
+    }
+
+    .sidebar-nav a:hover, .sidebar-nav a.active {
+      background: rgba(255,255,255,0.06); color: #fff;
+      border-left-color: #4f46e5;
+    }
+
+    .sidebar-nav a i { font-size: 18px; width: 22px; text-align: center; }
+
+    .sidebar-nav .section-label {
+      padding: 16px 20px 6px; font-size: 11px; font-weight: 600;
+      color: #64748b; text-transform: uppercase; letter-spacing: 1px;
+    }
+
+    .main-content { margin-left: 250px; min-height: 100vh; }
+
+    .topbar {
+      background: #fff; padding: 16px 32px;
+      display: flex; align-items: center; justify-content: space-between;
+      border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; z-index: 99;
+    }
+
+    .topbar h4 { font-size: 18px; font-weight: 600; color: #0f172a; margin: 0; }
+
+    .topbar-right { display: flex; align-items: center; gap: 16px; }
+
+    .user-badge {
+      display: flex; align-items: center; gap: 10px;
+      background: #f1f5f9; padding: 6px 14px 6px 10px;
+      border-radius: 20px; font-size: 13px; color: #334155;
+    }
+
+    .user-badge .avatar {
+      width: 30px; height: 30px; border-radius: 50%;
+      background: linear-gradient(135deg, #4f46e5, #7c3aed);
+      color: #fff; display: flex; align-items: center; justify-content: center;
+      font-size: 13px; font-weight: 600;
+    }
+
+    .content { padding: 28px 32px; }
+
+    .stat-card {
+      background: #fff; border-radius: 14px; padding: 22px 24px;
+      border: 1px solid #e2e8f0; transition: all 0.2s;
+    }
+
+    .stat-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.06); }
+
+    .stat-card .stat-icon {
+      width: 44px; height: 44px; border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px; margin-bottom: 14px;
+    }
+
+    .stat-card .stat-number { font-size: 28px; font-weight: 700; color: #0f172a; }
+    .stat-card .stat-label { font-size: 13px; color: #64748b; margin-top: 2px; }
+
+    .action-card {
+      background: #fff; border-radius: 14px; padding: 24px;
+      border: 1px solid #e2e8f0; text-decoration: none; display: block;
+      transition: all 0.2s;
+    }
+
+    .action-card:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.08); transform: translateY(-2px); }
+
+    .action-card .action-icon {
+      width: 48px; height: 48px; border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px; margin-bottom: 14px;
+    }
+
+    .action-card h6 { font-size: 15px; font-weight: 600; color: #0f172a; margin: 0 0 4px; }
+    .action-card p { font-size: 13px; color: #64748b; margin: 0; }
+
+    .section-title { font-size: 16px; font-weight: 600; color: #0f172a; margin: 0 0 16px; }
+
+    .badge-safe { background: #dcfce7; color: #15803d; font-size: 12px; padding: 4px 12px; border-radius: 20px; font-weight: 600; }
+
+    @media (max-width: 768px) {
+      .sidebar { width: 60px; }
+      .sidebar-brand h3, .sidebar-brand small, .sidebar-nav a span, .sidebar-nav .section-label { display: none; }
+      .sidebar-nav a { justify-content: center; padding: 14px; border-left: none; }
+      .main-content { margin-left: 60px; }
+      .content { padding: 20px 16px; }
+      .topbar { padding: 12px 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="sidebar">
+  <div class="sidebar-brand">
+    <h3>CertChain</h3>
+    <small><span class="badge-safe" style="font-size:10px;background:#4f46e5;color:#fff;padding:2px 10px;border-radius:10px;">ADMIN</span></small>
+  </div>
+  <div class="sidebar-nav">
+    <div class="section-label">Main</div>
+    <a href="/home" class="active"><i class="bi bi-grid-1x2-fill"></i><span>Dashboard</span></a>
+    <a href="/certificate/add"><i class="bi bi-file-earmark-plus"></i><span>Issue Certificate</span></a>
+    <a href="/certificate/list"><i class="bi bi-files"></i><span>All Certificates</span></a>
+
+    <div class="section-label">Blockchain</div>
+    <a href="/block/explorer"><i class="bi bi-link-45deg"></i><span>Blockchain Explorer</span></a>
+    <a href="/block/list"><i class="bi bi-list-columns"></i><span>Blocks</span></a>
+
+    <div class="section-label">Management</div>
+    <a href="/department/list"><i class="bi bi-building"></i><span>Departments</span></a>
+
+    <div class="section-label">Account</div>
+    <a href="/profile"><i class="bi bi-person"></i><span>Profile</span></a>
+    <a href="/logout"><i class="bi bi-box-arrow-left"></i><span>Logout</span></a>
+  </div>
+</div>
+
+<div class="main-content">
+  <div class="topbar">
+    <h4>Dashboard</h4>
+    <div class="topbar-right">
+      <a href="/block/explorer" class="btn btn-outline-dark btn-sm rounded-pill px-3">
+        <i class="bi bi-shield-check me-1"></i> Blockchain Status
+      </a>
+      <div class="user-badge">
+        <div class="avatar" th:text="${#strings.substring(user.fname, 0, 1).toUpperCase()}"></div>
+        <span th:text="${user.fname + ' ' + user.lname}">Admin</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <div class="row g-3 mb-4">
+      <div class="col-md-3 col-6">
+        <div class="stat-card">
+          <div class="stat-icon" style="background:#eef2ff;color:#4f46e5;"><i class="bi bi-file-earmark-text"></i></div>
+          <div class="stat-number" th:text="${totalCertificates}">0</div>
+          <div class="stat-label">Total Certificates</div>
+        </div>
+      </div>
+      <div class="col-md-3 col-6">
+        <div class="stat-card">
+          <div class="stat-icon" style="background:#f0fdf4;color:#15803d;"><i class="bi bi-link-45deg"></i></div>
+          <div class="stat-number" th:text="${totalBlocks}">0</div>
+          <div class="stat-label">Blockchain Blocks</div>
+        </div>
+      </div>
+      <div class="col-md-3 col-6">
+        <div class="stat-card">
+          <div class="stat-icon" style="background:#fef2f2;color:#dc2626;"><i class="bi bi-building"></i></div>
+          <div class="stat-number" th:text="${totalDepartments}">0</div>
+          <div class="stat-label">Departments</div>
+        </div>
+      </div>
+      <div class="col-md-3 col-6">
+        <div class="stat-card">
+          <div class="stat-icon" style="background:#f5f3ff;color:#7c3aed;"><i class="bi bi-shield-check"></i></div>
+          <div class="stat-number" style="font-size:18px;margin-top:6px;"><span class="badge-safe"><i class="bi bi-check-circle me-1"></i>SECURE</span></div>
+          <div class="stat-label">Blockchain Status</div>
+        </div>
+      </div>
+    </div>
+
+    <h5 class="section-title">Quick Actions</h5>
+    <div class="row g-3">
+      <div class="col-md-4">
+        <a href="/certificate/add" class="action-card">
+          <div class="action-icon" style="background:#eef2ff;color:#4f46e5;"><i class="bi bi-file-earmark-plus"></i></div>
+          <h6>Issue Certificate</h6>
+          <p>Create a new certificate with blockchain verification</p>
+        </a>
+      </div>
+      <div class="col-md-4">
+        <a href="/certificate/list" class="action-card">
+          <div class="action-icon" style="background:#f0fdf4;color:#15803d;"><i class="bi bi-files"></i></div>
+          <h6>View Certificates</h6>
+          <p>Browse all issued certificates and their status</p>
+        </a>
+      </div>
+      <div class="col-md-4">
+        <a href="/block/explorer" class="action-card">
+          <div class="action-icon" style="background:#fefce8;color:#ca8a04;"><i class="bi bi-link-45deg"></i></div>
+          <h6>Blockchain Explorer</h6>
+          <p>View the blockchain and verify chain integrity</p>
+        </a>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>
